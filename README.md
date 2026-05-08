@@ -2,28 +2,28 @@
 
 A desktop application for designing and simulating digital logic circuits. Built for engineers, students, and hobbyists who want to prototype and verify digital designs before breadboarding.
 
-LogicForge focuses on **logic correctness** — it simulates gate-level behavior, signal propagation, and sequential logic without modeling electrical characteristics.
+LogicForge focuses on **logic correctness** -it simulates gate-level behavior, signal propagation, and sequential logic without modeling electrical characteristics.
 
 ## Features
 
 ### Component Library
 
-**Logic Gates:** AND, OR, NOT, NAND, NOR, XOR, XNOR — rendered as classical IEEE schematic symbols
+**Logic Gates:** AND, OR, NOT, NAND, NOR, XOR, XNOR -rendered as classical IEEE schematic symbols
 
 **Sequential Logic:**
-- Flip-Flops (D, SR, JK, T) — edge-triggered with clock triangle indicators
-- Latches (D, SR) — level-triggered with enable pin
-- Registers (8-bit) — parallel load with hex value display
-- Counters (4-bit) — binary up-counter with synchronous reset
+- Flip-Flops (D, SR, JK, T) -edge-triggered with clock triangle indicators
+- Latches (D, SR) -level-triggered with enable pin
+- Registers (8-bit) -parallel load with hex value display
+- Counters (4-bit) -binary up-counter with synchronous reset
 
 **Routing:**
 - Multiplexers (2:1, 4:1) and Demultiplexers (1:2, 1:4)
 - Bus Splitters and Joiners (8-bit)
 
 **I/O:**
-- Input Switches — toggle with double-click
-- Output Probes — LED-style state indicator
-- Clock Source — configurable frequency, single-step mode
+- Input Switches -toggle with double-click
+- Output Probes -LED-style state indicator
+- Clock Source -configurable frequency, single-step mode
 
 **Custom Components:** Encapsulate any sub-circuit as a reusable block with named inputs and outputs
 
@@ -37,9 +37,9 @@ LogicForge focuses on **logic correctness** — it simulates gate-level behavior
 
 ### Tools
 
-- **Truth Table Generator** — automatically enumerates all input combinations and displays outputs
-- **Timing Diagram** — records and displays signal waveforms over time
-- **Image Export** — PNG (raster) and SVG (vector) export of circuit diagrams
+- **Truth Table Generator** -automatically enumerates all input combinations and displays outputs
+- **Timing Diagram** -records and displays signal waveforms over time
+- **Image Export** -PNG (raster) and SVG (vector) export of circuit diagrams
 
 ### Usability
 
@@ -112,17 +112,17 @@ digital_design_app.exe
 
 ## Usage
 
-1. **Place components** — Click a component in the sidebar palette, then click on the canvas to place it
-2. **Wire components** — Click an output pin (green), then click an input pin (blue) to connect them
-3. **Simulate** — Toggle input switches (double-click) to see signals propagate through the circuit
-4. **Clock circuits** — Double-click a Clock Source to start/stop it, or right-click for single-step and frequency controls
-5. **Create custom components** — Select a group of components, right-click, and choose "Create Custom Component..." to save it as a reusable block
-6. **Save your work** — Ctrl+S saves to a `.ddc` file (JSON format)
+1. **Place components** -Click a component in the sidebar palette, then click on the canvas to place it
+2. **Wire components** -Click an output pin (green), then click an input pin (blue) to connect them
+3. **Simulate** -Toggle input switches (double-click) to see signals propagate through the circuit
+4. **Clock circuits** -Double-click a Clock Source to start/stop it, or right-click for single-step and frequency controls
+5. **Create custom components** -Select a group of components, right-click, and choose "Create Custom Component..." to save it as a reusable block
+6. **Save your work** -Ctrl+S saves to a `.ddc` file (JSON format)
 
 ## File Formats
 
-- **`.ddc`** — Circuit project files (JSON). Self-contained, including any embedded custom components.
-- **`.dccomp`** — Custom component definitions (JSON). Stored in `~/Documents/digital_design_app/components/` and loaded into the palette automatically.
+- **`.ddc`** -Circuit project files (JSON). Self-contained, including any embedded custom components.
+- **`.dccomp`** -Custom component definitions (JSON). Stored in `~/Documents/digital_design_app/components/` and loaded into the palette automatically.
 
 ## Project Structure
 
