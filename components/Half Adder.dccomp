@@ -1,0 +1,104 @@
+{
+    "circuit": {
+        "components": [
+            {
+                "id": "{04d44dde-3a38-4917-b5a2-6627ba47ead1}",
+                "label": "B",
+                "on": false,
+                "rotation": 0,
+                "type": "Input Switch",
+                "x": -440,
+                "y": -240
+            },
+            {
+                "id": "{101c668e-611b-4608-bb76-26e59e471428}",
+                "label": "Carry",
+                "rotation": 0,
+                "type": "Output Probe",
+                "x": 120,
+                "y": -180
+            },
+            {
+                "id": "{ae2e0494-aa39-4877-80a0-80c529dcdcc1}",
+                "label": "Sum",
+                "rotation": 0,
+                "type": "Output Probe",
+                "x": 120,
+                "y": -340
+            },
+            {
+                "id": "{f1d24425-8a26-4a96-a454-ef5298dd08d6}",
+                "numInputs": 2,
+                "rotation": 0,
+                "type": "AND",
+                "x": -120,
+                "y": -180
+            },
+            {
+                "id": "{355f2d4b-40c1-4285-afea-f9b37450ae45}",
+                "label": "A",
+                "on": false,
+                "rotation": 0,
+                "type": "Input Switch",
+                "x": -440,
+                "y": -340
+            },
+            {
+                "id": "{1d526453-9e0d-481f-92d7-d2c0bb4763e0}",
+                "numInputs": 2,
+                "rotation": 0,
+                "type": "XOR",
+                "x": -120,
+                "y": -340
+            }
+        ],
+        "version": "1.0",
+        "wires": [
+            {
+                "dstId": "{ae2e0494-aa39-4877-80a0-80c529dcdcc1}",
+                "dstPin": 0,
+                "srcId": "{1d526453-9e0d-481f-92d7-d2c0bb4763e0}",
+                "srcPin": 0
+            },
+            {
+                "dstId": "{101c668e-611b-4608-bb76-26e59e471428}",
+                "dstPin": 0,
+                "srcId": "{f1d24425-8a26-4a96-a454-ef5298dd08d6}",
+                "srcPin": 0
+            },
+            {
+                "dstId": "{1d526453-9e0d-481f-92d7-d2c0bb4763e0}",
+                "dstPin": 0,
+                "srcId": "{355f2d4b-40c1-4285-afea-f9b37450ae45}",
+                "srcPin": 0
+            },
+            {
+                "dstId": "{1d526453-9e0d-481f-92d7-d2c0bb4763e0}",
+                "dstPin": 1,
+                "srcId": "{04d44dde-3a38-4917-b5a2-6627ba47ead1}",
+                "srcPin": 0
+            },
+            {
+                "dstId": "{f1d24425-8a26-4a96-a454-ef5298dd08d6}",
+                "dstPin": 0,
+                "srcId": "{355f2d4b-40c1-4285-afea-f9b37450ae45}",
+                "srcPin": 0
+            },
+            {
+                "dstId": "{f1d24425-8a26-4a96-a454-ef5298dd08d6}",
+                "dstPin": 1,
+                "srcId": "{04d44dde-3a38-4917-b5a2-6627ba47ead1}",
+                "srcPin": 0
+            }
+        ]
+    },
+    "inputs": [
+        "B",
+        "A"
+    ],
+    "name": "Half Adder",
+    "outputs": [
+        "Carry",
+        "Sum"
+    ]
+}

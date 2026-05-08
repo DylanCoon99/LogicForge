@@ -1,0 +1,70 @@
+{
+    "components": [
+        {
+            "id": "{1d4993a6-0445-4ac1-acaf-7b24c851992e}",
+            "numInputs": 2,
+            "rotation": 0,
+            "type": "OR",
+            "x": -280,
+            "y": -260
+        },
+        {
+            "id": "{a5add45c-2a1d-4620-9222-0ac86cfee553}",
+            "numInputs": 2,
+            "rotation": 0,
+            "type": "OR",
+            "x": -240,
+            "y": -20
+        },
+        {
+            "id": "{26249726-73f9-4b31-81cf-d291621c80c1}",
+            "numInputs": 1,
+            "rotation": 0,
+            "type": "NOT",
+            "x": -40,
+            "y": -220
+        },
+        {
+            "id": "{e6bc4523-8155-40b3-ac90-173ef8eb0a1c}",
+            "numInputs": 2,
+            "rotation": 0,
+            "type": "AND",
+            "x": 200,
+            "y": -100
+        },
+        {
+            "id": "{348a5572-5614-45b2-9c54-dc514097e5b1}",
+            "rotation": 0,
+            "type": "Output Probe",
+            "x": 340,
+            "y": -60
+        }
+    ],
+    "version": "1.0",
+    "wires": [
+        {
+            "dstId": "{26249726-73f9-4b31-81cf-d291621c80c1}",
+            "dstPin": 0,
+            "srcId": "{1d4993a6-0445-4ac1-acaf-7b24c851992e}",
+            "srcPin": 0
+        },
+        {
+            "dstId": "{e6bc4523-8155-40b3-ac90-173ef8eb0a1c}",
+            "dstPin": 0,
+            "srcId": "{26249726-73f9-4b31-81cf-d291621c80c1}",
+            "srcPin": 0
+        },
+        {
+            "dstId": "{e6bc4523-8155-40b3-ac90-173ef8eb0a1c}",
+            "dstPin": 1,
+            "srcId": "{a5add45c-2a1d-4620-9222-0ac86cfee553}",
+            "srcPin": 0
+        },
+        {
+            "dstId": "{348a5572-5614-45b2-9c54-dc514097e5b1}",
+            "dstPin": 0,
+            "srcId": "{e6bc4523-8155-40b3-ac90-173ef8eb0a1c}",
+            "srcPin": 0
+        }
+    ]
+}
