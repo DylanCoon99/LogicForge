@@ -6,6 +6,7 @@
 
 #include <QHBoxLayout>
 #include <QListWidget>
+#include <QListWidgetItem>
 #include <QMenuBar>
 #include <QAction>
 #include <QApplication>
@@ -159,9 +160,22 @@ void MainWindow::setupCanvas()
     m_view = new CircuitView(m_scene, this);
 }
 
+void MainWindow::addPaletteHeader(const QString &title)
+{
+    auto *item = new QListWidgetItem(title);
+    item->setFlags(item->flags() & ~(Qt::ItemIsSelectable | Qt::ItemIsEnabled));
+    QFont font = item->font();
+    font.setBold(true);
+    font.setPointSize(9);
+    item->setFont(font);
+    item->setForeground(QColor(120, 180, 255));
+    item->setBackground(QColor(40, 40, 50));
+    m_palette->addItem(item);
+}
+
 void MainWindow::populatePalette()
 {
-    // Gates
+    addPaletteHeader("Logic Gates");
     m_palette->addItem("AND Gate");
     m_palette->addItem("OR Gate");
     m_palette->addItem("NOT Gate");
@@ -170,32 +184,32 @@ void MainWindow::populatePalette()
     m_palette->addItem("XOR Gate");
     m_palette->addItem("XNOR Gate");
 
-    // I/O
+    addPaletteHeader("I/O");
     m_palette->addItem("Input Switch");
     m_palette->addItem("Output Probe");
     m_palette->addItem("Clock Source");
 
-    // Flip-Flops
+    addPaletteHeader("Flip-Flops");
     m_palette->addItem("D Flip-Flop");
     m_palette->addItem("SR Flip-Flop");
     m_palette->addItem("JK Flip-Flop");
     m_palette->addItem("T Flip-Flop");
 
-    // Latches
+    addPaletteHeader("Latches");
     m_palette->addItem("D Latch");
     m_palette->addItem("SR Latch");
 
-    // Mux / Demux
+    addPaletteHeader("Mux / Demux");
     m_palette->addItem("Mux 2:1");
     m_palette->addItem("Mux 4:1");
     m_palette->addItem("Demux 1:2");
     m_palette->addItem("Demux 1:4");
 
-    // Sequential
+    addPaletteHeader("Registers / Counters");
     m_palette->addItem("Register (8-bit)");
     m_palette->addItem("Counter (4-bit)");
 
-    // Bus
+    addPaletteHeader("Bus");
     m_palette->addItem("Bus Splitter (8)");
     m_palette->addItem("Bus Joiner (8)");
 
@@ -204,11 +218,10 @@ void MainWindow::populatePalette()
 
 void MainWindow::loadCustomComponents()
 {
-    // Remove existing custom items (items after a separator marker)
-    // Find and remove items after "--- Custom ---"
+    // Remove existing custom items
     for (int i = m_palette->count() - 1; i >= 0; --i) {
         auto *item = m_palette->item(i);
-        if (item->text().startsWith("Custom:") || item->text() == "--- Custom ---")
+        if (item->text().startsWith("Custom:") || item->text() == "Custom ICs")
             delete m_palette->takeItem(i);
     }
 
@@ -220,12 +233,7 @@ void MainWindow::loadCustomComponents()
     QStringList files = compDir.entryList(QStringList() << "*.dccomp", QDir::Files);
     if (files.isEmpty()) return;
 
-    // Add separator
-    auto *sep = new QListWidgetItem("--- Custom ---");
-    sep->setFlags(sep->flags() & ~Qt::ItemIsSelectable);
-    sep->setForeground(QColor(0, 180, 180));
-    m_palette->addItem(sep);
-
+    addPaletteHeader("Custom ICs");
     for (const QString &f : files) {
         QString name = QFileInfo(f).baseName();
         m_palette->addItem("Custom: " + name);
@@ -243,7 +251,9 @@ void MainWindow::newCircuit()
 void MainWindow::onPaletteItemClicked(int row)
 {
     if (row < 0) return;
-    m_scene->setPendingComponentType(m_palette->item(row)->text());
+    auto *item = m_palette->item(row);
+    if (!item || !(item->flags() & Qt::ItemIsEnabled)) return;
+    m_scene->setPendingComponentType(item->text());
 }
 
 // --- Save / Load ---

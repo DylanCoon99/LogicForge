@@ -6,6 +6,7 @@
 class CircuitScene;
 class CircuitView;
 class QListWidget;
+class QListWidgetItem;
 class QUndoStack;
 class TimingDiagramWidget;
 
@@ -35,6 +36,8 @@ private:
     void loadCustomComponents();
     void updateWindowTitle();
     QString defaultCircuitsDir() const;
+
+    void addPaletteHeader(const QString &title);
 
     CircuitScene *m_scene;
     CircuitView  *m_view;
