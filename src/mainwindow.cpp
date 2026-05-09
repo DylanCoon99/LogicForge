@@ -20,6 +20,10 @@
 #include <QSvgGenerator>
 #include <QMessageBox>
 #include <QDockWidget>
+#include <QToolButton>
+#include <QToolBar>
+#include <QPixmap>
+#include <QPolygonF>
 #include <QDir>
 #include <QStandardPaths>
 
@@ -45,10 +49,47 @@ MainWindow::MainWindow(QWidget *parent)
     addDockWidget(Qt::BottomDockWidgetArea, dock);
     dock->hide();
 
+    // Pointer mode button + canvas in a vertical layout
+    auto *canvasContainer = new QWidget();
+    auto *canvasLayout = new QVBoxLayout(canvasContainer);
+    canvasLayout->setContentsMargins(0, 0, 0, 0);
+    canvasLayout->setSpacing(0);
+
+    auto *canvasToolbar = new QToolBar();
+    canvasToolbar->setIconSize(QSize(20, 20));
+    canvasToolbar->setMovable(false);
+    canvasToolbar->setFixedHeight(28);
+
+    // Draw a mouse pointer icon programmatically
+    QPixmap pointerPixmap(20, 20);
+    pointerPixmap.fill(Qt::transparent);
+    {
+        QPainter p(&pointerPixmap);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(Qt::white, 1.2));
+        p.setBrush(QColor(60, 60, 60));
+        // Arrow pointer shape
+        QPolygonF arrow;
+        arrow << QPointF(2, 1) << QPointF(2, 15) << QPointF(6, 12)
+              << QPointF(10, 18) << QPointF(12, 17) << QPointF(8, 11)
+              << QPointF(13, 11) << QPointF(2, 1);
+        p.drawPolygon(arrow);
+    }
+
+    auto *pointerAction = canvasToolbar->addAction(QIcon(pointerPixmap), QString(), [this]() {
+        m_scene->clearPendingComponent();
+        m_palette->clearSelection();
+        m_palette->setCurrentRow(-1);
+    });
+    pointerAction->setToolTip("Select Mode (Esc)");
+
+    canvasLayout->addWidget(canvasToolbar);
+    canvasLayout->addWidget(m_view);
+
     // Layout: splitter with sidebar on left, canvas on right
     auto *splitter = new QSplitter(Qt::Horizontal, this);
     splitter->addWidget(m_palette);
-    splitter->addWidget(m_view);
+    splitter->addWidget(canvasContainer);
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 1);
     splitter->setSizes({200, 1000});
