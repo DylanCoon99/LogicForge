@@ -827,33 +827,20 @@ void ComponentGraphicsItem::paintCounter(QPainter *painter)
 void ComponentGraphicsItem::paintBus(QPainter *painter)
 {
     const QRectF r = rect();
-    const qreal w = r.width();
-    const qreal h = r.height();
-    const qreal x0 = r.x();
-    const qreal y0 = r.y();
-
-    bool isSplitter = dynamic_cast<BusSplitter*>(m_component) != nullptr;
-
-    QPainterPath path;
-    if (isSplitter) {
-        // Fan-out: narrow left, wide right
-        path.moveTo(x0, y0 + h * 0.3);
-        path.lineTo(x0 + w, y0);
-        path.lineTo(x0 + w, y0 + h);
-        path.lineTo(x0, y0 + h * 0.7);
-        path.closeSubpath();
-    } else {
-        // Fan-in (BusJoiner): wide left, narrow right
-        path.moveTo(x0, y0);
-        path.lineTo(x0 + w, y0 + h * 0.3);
-        path.lineTo(x0 + w, y0 + h * 0.7);
-        path.lineTo(x0, y0 + h);
-        path.closeSubpath();
-    }
 
     painter->setPen(QPen(QColor(200, 200, 200), 2));
     painter->setBrush(QBrush(QColor(50, 50, 60)));
-    painter->drawPath(path);
+    painter->drawRect(r);
+
+    // Label
+    bool isSplitter = dynamic_cast<BusSplitter*>(m_component) != nullptr;
+    painter->setPen(Qt::white);
+    QFont font = painter->font();
+    font.setPointSize(9);
+    font.setBold(true);
+    font.setItalic(false);
+    painter->setFont(font);
+    painter->drawText(r, Qt::AlignCenter, isSplitter ? "SPLIT" : "JOIN");
 
     paintPinLabels(painter);
 }
@@ -961,6 +948,35 @@ void ComponentGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
     if (gateComp && gateComp->gateType() != GateComponent::NOT) {
         menu.addSeparator();
         setInputCountAction = menu.addAction(QString("Set Input Count... (%1)").arg(gateComp->numInputs()));
+    }
+
+    // Resizable component controls
+    QAction *resizeAction = nullptr;
+    auto *muxComp = dynamic_cast<Mux*>(m_component);
+    auto *demuxComp = dynamic_cast<Demux*>(m_component);
+    auto *regComp = dynamic_cast<RegisterComponent*>(m_component);
+    auto *ctrComp = dynamic_cast<Counter*>(m_component);
+    auto *splitComp = dynamic_cast<BusSplitter*>(m_component);
+    auto *joinComp = dynamic_cast<BusJoiner*>(m_component);
+
+    if (muxComp) {
+        menu.addSeparator();
+        resizeAction = menu.addAction(QString("Set Data Inputs... (%1:1)").arg(muxComp->numDataInputs()));
+    } else if (demuxComp) {
+        menu.addSeparator();
+        resizeAction = menu.addAction(QString("Set Data Outputs... (1:%1)").arg(demuxComp->numDataOutputs()));
+    } else if (regComp) {
+        menu.addSeparator();
+        resizeAction = menu.addAction(QString("Set Bit Width... (%1-bit)").arg(regComp->bitWidth()));
+    } else if (ctrComp) {
+        menu.addSeparator();
+        resizeAction = menu.addAction(QString("Set Bit Width... (%1-bit)").arg(ctrComp->bitWidth()));
+    } else if (splitComp) {
+        menu.addSeparator();
+        resizeAction = menu.addAction(QString("Set Bit Width... (%1)").arg(splitComp->bitWidth()));
+    } else if (joinComp) {
+        menu.addSeparator();
+        resizeAction = menu.addAction(QString("Set Bit Width... (%1)").arg(joinComp->bitWidth()));
     }
 
     // Clock source controls
@@ -1077,6 +1093,87 @@ void ComponentGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
             update();
             if (circuitScene)
                 circuitScene->runSimulation();
+        }
+    } else if (chosen == resizeAction && resizeAction) {
+        QWidget *parentWidget = nullptr;
+        if (scene() && !scene()->views().isEmpty())
+            parentWidget = scene()->views().first();
+
+        auto *circuitScene = dynamic_cast<CircuitScene*>(scene());
+        if (!circuitScene) return;
+
+        bool ok = false;
+        int newSize = 0;
+        Component *newComp = nullptr;
+
+        if (muxComp) {
+            // Mux: power of 2 selection via combo box
+            QStringList options;
+            int currentIdx = 0;
+            for (int p = 1; p <= 6; ++p) {  // 2, 4, 8, 16, 32, 64
+                int n = 1 << p;
+                options << QString("%1:1").arg(n);
+                if (n == muxComp->numDataInputs()) currentIdx = p - 1;
+            }
+            QString choice = QInputDialog::getItem(parentWidget, "Mux Size",
+                "Select mux size:", options, currentIdx, false, &ok);
+            if (ok) {
+                newSize = choice.split(":").first().toInt();
+                newComp = new Mux(newSize);
+            }
+        } else if (demuxComp) {
+            QStringList options;
+            int currentIdx = 0;
+            for (int p = 1; p <= 6; ++p) {
+                int n = 1 << p;
+                options << QString("1:%1").arg(n);
+                if (n == demuxComp->numDataOutputs()) currentIdx = p - 1;
+            }
+            QString choice = QInputDialog::getItem(parentWidget, "Demux Size",
+                "Select demux size:", options, currentIdx, false, &ok);
+            if (ok) {
+                newSize = choice.split(":").last().toInt();
+                newComp = new Demux(newSize);
+            }
+        } else if (regComp) {
+            newSize = QInputDialog::getInt(parentWidget, "Register Width",
+                "Bit width:", regComp->bitWidth(), 1, 32, 1, &ok);
+            if (ok && newSize != regComp->bitWidth())
+                newComp = new RegisterComponent(newSize);
+        } else if (ctrComp) {
+            newSize = QInputDialog::getInt(parentWidget, "Counter Width",
+                "Bit width:", ctrComp->bitWidth(), 1, 16, 1, &ok);
+            if (ok && newSize != ctrComp->bitWidth())
+                newComp = new Counter(newSize);
+        } else if (splitComp) {
+            newSize = QInputDialog::getInt(parentWidget, "Bus Splitter Width",
+                "Bit width:", splitComp->bitWidth(), 2, 32, 1, &ok);
+            if (ok && newSize != splitComp->bitWidth())
+                newComp = new BusSplitter(newSize);
+        } else if (joinComp) {
+            newSize = QInputDialog::getInt(parentWidget, "Bus Joiner Width",
+                "Bit width:", joinComp->bitWidth(), 2, 32, 1, &ok);
+            if (ok && newSize != joinComp->bitWidth())
+                newComp = new BusJoiner(newSize);
+        }
+
+        if (newComp) {
+            // Preserve position, label, rotation
+            newComp->setPosition(m_component->position());
+            newComp->setLabel(m_component->label());
+            newComp->setRotation(m_component->rotation());
+
+            // Remove old component (this deletes us!)
+            QPointF pos = this->pos();
+            circuitScene->removeComponentItem(this);
+            // 'this' is now deleted - don't access any members
+
+            // Add new component
+            circuitScene->circuit()->addComponent(newComp);
+            auto *newItem = new ComponentGraphicsItem(newComp);
+            newItem->setPos(pos);
+            circuitScene->addItem(newItem);
+            circuitScene->runSimulation();
         }
     }
 }
