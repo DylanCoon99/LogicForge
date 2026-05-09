@@ -25,12 +25,25 @@ protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+    void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
 private:
     void createPinItems();
+    void repositionPins();
     qreal computeHeight() const;
+    qreal minWidth() const;
+    qreal minHeight() const;
     bool isGate() const;
+    bool isInResizeHandle(const QPointF &pos) const;
+
+    static constexpr qreal ResizeHandleSize = 12.0;
+    bool m_resizing;
+    QPointF m_resizeStart;
+    QRectF m_resizeOrigRect;
 
     void paintGate(QPainter *painter);
     void paintFlipFlop(QPainter *painter);

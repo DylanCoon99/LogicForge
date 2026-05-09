@@ -24,6 +24,7 @@
 #include <QPen>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneHoverEvent>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QGraphicsView>
 #include <QMenu>
@@ -31,7 +32,8 @@
 #include <QApplication>
 
 ComponentGraphicsItem::ComponentGraphicsItem(Component *component)
-    : m_component(component)
+    : m_resizing(false)
+    , m_component(component)
 {
     qreal h = computeHeight();
     setRect(0, 0, Width, h);
@@ -39,6 +41,7 @@ ComponentGraphicsItem::ComponentGraphicsItem(Component *component)
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+    setAcceptHoverEvents(true);
 
     setPen(QPen(QColor(200, 200, 200), 2));
     setBrush(QBrush(QColor(50, 50, 60)));
@@ -85,6 +88,102 @@ qreal ComponentGraphicsItem::computeHeight() const
 bool ComponentGraphicsItem::isGate() const
 {
     return dynamic_cast<GateComponent*>(m_component) != nullptr;
+}
+
+qreal ComponentGraphicsItem::minWidth() const
+{
+    return Width;
+}
+
+qreal ComponentGraphicsItem::minHeight() const
+{
+    return computeHeight();
+}
+
+bool ComponentGraphicsItem::isInResizeHandle(const QPointF &pos) const
+{
+    QRectF r = rect();
+    QRectF handle(r.right() - ResizeHandleSize, r.bottom() - ResizeHandleSize,
+                  ResizeHandleSize, ResizeHandleSize);
+    return handle.contains(pos);
+}
+
+void ComponentGraphicsItem::repositionPins()
+{
+    const QRectF r = rect();
+    const auto &inputs = m_component->inputPins();
+    const auto &outputs = m_component->outputPins();
+
+    for (int i = 0; i < m_inputPinItems.size(); ++i) {
+        qreal y = (r.height() / (inputs.size() + 1)) * (i + 1);
+        m_inputPinItems[i]->setPos(0, y);
+    }
+    for (int i = 0; i < m_outputPinItems.size(); ++i) {
+        qreal y = (r.height() / (outputs.size() + 1)) * (i + 1);
+        m_outputPinItems[i]->setPos(r.width(), y);
+    }
+}
+
+void ComponentGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton && isInResizeHandle(event->pos())) {
+        m_resizing = true;
+        m_resizeStart = event->pos();
+        m_resizeOrigRect = rect();
+        // Disable move so Qt doesn't start a drag
+        setFlag(QGraphicsItem::ItemIsMovable, false);
+        event->accept();
+        return;
+    }
+    QGraphicsRectItem::mousePressEvent(event);
+}
+
+void ComponentGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (m_resizing) {
+        QPointF delta = event->pos() - m_resizeStart;
+        qreal newW = qMax(minWidth(), m_resizeOrigRect.width() + delta.x());
+        qreal newH = qMax(minHeight(), m_resizeOrigRect.height() + delta.y());
+        // Snap to grid
+        newW = CircuitScene::snapToGrid(newW);
+        newH = CircuitScene::snapToGrid(newH);
+        prepareGeometryChange();
+        setRect(0, 0, newW, newH);
+        repositionPins();
+        // Update connected wires
+        if (scene()) {
+            for (auto *item : scene()->items()) {
+                auto *wireItem = dynamic_cast<WireGraphicsItem*>(item);
+                if (wireItem && wireItem->isConnectedTo(this))
+                    wireItem->updatePath();
+            }
+        }
+        event->accept();
+        return;
+    }
+    QGraphicsRectItem::mouseMoveEvent(event);
+}
+
+void ComponentGraphicsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (m_resizing) {
+        m_resizing = false;
+        // Re-enable move
+        setFlag(QGraphicsItem::ItemIsMovable, true);
+        event->accept();
+        return;
+    }
+    QGraphicsRectItem::mouseReleaseEvent(event);
+}
+
+void ComponentGraphicsItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+{
+    if (isInResizeHandle(event->pos())) {
+        setCursor(Qt::SizeFDiagCursor);
+    } else {
+        setCursor(Qt::ArrowCursor);
+    }
+    QGraphicsRectItem::hoverMoveEvent(event);
 }
 
 QRectF ComponentGraphicsItem::boundingRect() const
@@ -192,6 +291,17 @@ void ComponentGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsI
         painter->setPen(QPen(QColor(0, 150, 255), 2, Qt::DashLine));
         painter->setBrush(Qt::NoBrush);
         painter->drawRect(rect().adjusted(-3, -3, 3, 3));
+
+        // Draw resize handle triangle at bottom-right corner
+        QRectF r = rect();
+        QPainterPath triangle;
+        triangle.moveTo(r.right(), r.bottom() - ResizeHandleSize);
+        triangle.lineTo(r.right(), r.bottom());
+        triangle.lineTo(r.right() - ResizeHandleSize, r.bottom());
+        triangle.closeSubpath();
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor(0, 150, 255, 150));
+        painter->drawPath(triangle);
     }
 }
 
