@@ -1,0 +1,39 @@
+{
+    "circuit": {
+        "components": [
+            {
+                "id": "{e5c2cf72-0913-44a1-b384-c92dcceae48b}",
+                "label": "OUT",
+                "rotation": 0,
+                "type": "Output Probe",
+                "x": 0,
+                "y": -280
+            },
+            {
+                "id": "{85221e5d-ec09-46b5-b810-1793d1c67ced}",
+                "label": "IN",
+                "on": false,
+                "rotation": 0,
+                "type": "Input Switch",
+                "x": -320,
+                "y": -340
+            }
+        ],
+        "version": "1.0",
+        "wires": [
+            {
+                "dstId": "{e5c2cf72-0913-44a1-b384-c92dcceae48b}",
+                "dstPin": 0,
+                "srcId": "{85221e5d-ec09-46b5-b810-1793d1c67ced}",
+                "srcPin": 0
+            }
+        ]
+    },
+    "inputs": [
+        "IN"
+    ],
+    "name": "Passthrough",
+    "outputs": [
+        "OUT"
+    ]
+}

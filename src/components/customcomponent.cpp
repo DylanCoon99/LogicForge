@@ -106,13 +106,19 @@ void CustomComponent::evaluate()
         if (!sw) continue;
 
         bool shouldBeOn = (m_inputs[i]->state() == Pin::High);
-        if (sw->isOn() != shouldBeOn)
+        if (sw->isOn() != shouldBeOn) {
             sw->toggle();
+        } else {
+            sw->evaluate();
+        }
     }
 
-    // 2. Run internal simulation
+    // 2. Run internal simulation with single-edge semantics:
+    //    - First iteration: saves previous states, propagates, evaluates (edges fire)
+    //    - Subsequent iterations: saves previous again (so edges don't re-fire),
+    //      then settles combinational logic
     if (m_internalEngine)
-        m_internalEngine->simulate();
+        m_internalEngine->simulateSingleEdge();
 
     // 3. Read internal OutputProbe states to external output pins
     for (int i = 0; i < m_outputs.size() && i < m_outputMappings.size(); ++i) {

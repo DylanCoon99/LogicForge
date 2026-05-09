@@ -1,0 +1,70 @@
+{
+    "circuit": {
+        "components": [
+            {
+                "id": "{ed2367bd-6707-483d-bc74-bcc8d9d88d43}",
+                "label": "Output",
+                "rotation": 0,
+                "type": "Output Probe",
+                "x": 260,
+                "y": -420
+            },
+            {
+                "id": "{6715ccc6-77a4-490e-9a64-7fbda432fe6b}",
+                "label": "D",
+                "on": false,
+                "rotation": 0,
+                "type": "Input Switch",
+                "x": -160,
+                "y": -440
+            },
+            {
+                "id": "{47dcea49-c1ff-4658-ada3-de772e061c5c}",
+                "label": "CLK",
+                "on": false,
+                "rotation": 0,
+                "type": "Input Switch",
+                "x": -120,
+                "y": -300
+            },
+            {
+                "ffType": 1,
+                "id": "{d38dd4c3-1462-4ceb-8e1f-808f05dcc3ca}",
+                "q": false,
+                "rotation": 0,
+                "type": "D Flip-Flop",
+                "x": 60,
+                "y": -400
+            }
+        ],
+        "version": "1.0",
+        "wires": [
+            {
+                "dstId": "{d38dd4c3-1462-4ceb-8e1f-808f05dcc3ca}",
+                "dstPin": 0,
+                "srcId": "{6715ccc6-77a4-490e-9a64-7fbda432fe6b}",
+                "srcPin": 0
+            },
+            {
+                "dstId": "{d38dd4c3-1462-4ceb-8e1f-808f05dcc3ca}",
+                "dstPin": 1,
+                "srcId": "{47dcea49-c1ff-4658-ada3-de772e061c5c}",
+                "srcPin": 0
+            },
+            {
+                "dstId": "{ed2367bd-6707-483d-bc74-bcc8d9d88d43}",
+                "dstPin": 0,
+                "srcId": "{d38dd4c3-1462-4ceb-8e1f-808f05dcc3ca}",
+                "srcPin": 0
+            }
+        ]
+    },
+    "inputs": [
+        "D",
+        "CLK"
+    ],
+    "name": "DFF_Test",
+    "outputs": [
+        "Output"
+    ]
+}

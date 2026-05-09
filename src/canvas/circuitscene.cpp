@@ -140,7 +140,17 @@ ComponentGraphicsItem* CircuitScene::createComponentItem(const QString &type, co
 {
     Component *comp = nullptr;
 
-    if (type.contains("Input Switch")) {
+    if (type.startsWith("Custom:")) {
+        // Load custom component from .dccomp file — check FIRST to avoid
+        // matching built-in type names like "Counter", "Register", etc.
+        QString customName = type.mid(8); // strip "Custom: "
+        QString dir = QDir::homePath() + "/Documents/digital_design_app/components";
+        QString filePath = dir + "/" + customName + ".dccomp";
+        auto *custom = CustomComponent::fromFile(filePath);
+        if (custom) {
+            comp = custom;
+        }
+    } else if (type.contains("Input Switch")) {
         comp = new InputSwitch();
     } else if (type.contains("Output Probe")) {
         comp = new OutputProbe();
@@ -174,18 +184,6 @@ ComponentGraphicsItem* CircuitScene::createComponentItem(const QString &type, co
         comp = new BusSplitter(8);
     } else if (type.contains("Bus Joiner")) {
         comp = new BusJoiner(8);
-    } else if (type.startsWith("Custom:")) {
-        // Load from components directory
-        QString customName = type.mid(8); // strip "Custom: "
-        QString dir = QDir::homePath() + "/Documents/digital_design_app/components";
-        QString filePath = dir + "/" + customName + ".dccomp";
-        auto *custom = CustomComponent::fromFile(filePath);
-        if (custom) {
-            comp = custom;
-        } else {
-            // fallback
-            comp = new GateComponent(GateComponent::AND);
-        }
     } else {
         // It's a gate
         auto gateType = GateComponent::gateTypeFromName(type);
