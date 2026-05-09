@@ -11,6 +11,9 @@ public:
     GateComponent(GateType gateType, int numInputs = 2);
 
     GateType gateType() const { return m_gateType; }
+    int numInputs() const { return m_inputs.size(); }
+    void addInput();
+    void removeInput();
     void evaluate() override;
     QJsonObject toJson() const override;
 

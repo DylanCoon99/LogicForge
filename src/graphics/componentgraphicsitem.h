@@ -20,6 +20,8 @@ public:
     const QVector<PinGraphicsItem*>& inputPinItems() const { return m_inputPinItems; }
     const QVector<PinGraphicsItem*>& outputPinItems() const { return m_outputPinItems; }
 
+    void rebuildPins();
+
 protected:
     QRectF boundingRect() const override;
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;

@@ -79,6 +79,23 @@ void ComponentGraphicsItem::createPinItems()
     }
 }
 
+void ComponentGraphicsItem::rebuildPins()
+{
+    // Remove old pin graphics items
+    qDeleteAll(m_inputPinItems);
+    m_inputPinItems.clear();
+    qDeleteAll(m_outputPinItems);
+    m_outputPinItems.clear();
+
+    // Resize rect to fit new pin count
+    qreal h = qMax(rect().height(), computeHeight());
+    prepareGeometryChange();
+    setRect(0, 0, rect().width(), h);
+
+    // Recreate pin graphics items
+    createPinItems();
+}
+
 qreal ComponentGraphicsItem::computeHeight() const
 {
     int maxPins = qMax(m_component->inputPins().size(), m_component->outputPins().size());
@@ -938,6 +955,14 @@ void ComponentGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
 
     QAction *deleteAction = menu.addAction("Delete");
 
+    // Gate input controls
+    QAction *setInputCountAction = nullptr;
+    auto *gateComp = dynamic_cast<GateComponent*>(m_component);
+    if (gateComp && gateComp->gateType() != GateComponent::NOT) {
+        menu.addSeparator();
+        setInputCountAction = menu.addAction(QString("Set Input Count... (%1)").arg(gateComp->numInputs()));
+    }
+
     // Clock source controls
     QAction *clockStartStopAction = nullptr;
     QAction *clockStepAction = nullptr;
@@ -1014,6 +1039,44 @@ void ComponentGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
         if (ok) {
             clockComp->setPeriod(period);
             update();
+        }
+    } else if (chosen == setInputCountAction && gateComp) {
+        QWidget *parentWidget = nullptr;
+        if (scene() && !scene()->views().isEmpty())
+            parentWidget = scene()->views().first();
+
+        bool ok = false;
+        int count = QInputDialog::getInt(parentWidget,
+                                          "Set Input Count",
+                                          "Number of inputs:",
+                                          gateComp->numInputs(),
+                                          2, 64, 1, &ok);
+        if (ok && count != gateComp->numInputs()) {
+            auto *circuitScene = dynamic_cast<CircuitScene*>(scene());
+            // Remove wires from pins that will be deleted
+            while (gateComp->numInputs() > count) {
+                if (circuitScene) {
+                    Pin *lastPin = gateComp->inputPins().last();
+                    auto wires = circuitScene->circuit()->wiresForPin(lastPin);
+                    for (auto *w : wires) {
+                        for (auto *item : scene()->items()) {
+                            auto *wireItem = dynamic_cast<WireGraphicsItem*>(item);
+                            if (wireItem && wireItem->wire() == w) {
+                                circuitScene->removeWireItem(wireItem);
+                                break;
+                            }
+                        }
+                    }
+                }
+                gateComp->removeInput();
+            }
+            while (gateComp->numInputs() < count) {
+                gateComp->addInput();
+            }
+            rebuildPins();
+            update();
+            if (circuitScene)
+                circuitScene->runSimulation();
         }
     }
 }

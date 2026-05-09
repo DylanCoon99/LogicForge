@@ -11,6 +11,20 @@ GateComponent::GateComponent(GateType gateType, int numInputs)
     addOutputPin("OUT");
 }
 
+void GateComponent::addInput()
+{
+    if (m_gateType == NOT) return; // NOT is always 1 input
+    addInputPin(QString("IN%1").arg(m_inputs.size()));
+}
+
+void GateComponent::removeInput()
+{
+    if (m_gateType == NOT) return;
+    if (m_inputs.size() <= 2) return; // minimum 2 inputs
+    Pin *pin = m_inputs.takeLast();
+    delete pin;
+}
+
 void GateComponent::evaluate()
 {
     // If any input is undefined, output is undefined
