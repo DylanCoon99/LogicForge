@@ -30,6 +30,7 @@
 #include <QMenu>
 #include <QInputDialog>
 #include <QApplication>
+#include <cmath>
 
 ComponentGraphicsItem::ComponentGraphicsItem(Component *component)
     : m_resizing(false)
@@ -60,13 +61,44 @@ void ComponentGraphicsItem::createPinItems()
     const auto &inputs = m_component->inputPins();
     const auto &outputs = m_component->outputPins();
 
-    qreal h = computeHeight();
+    qreal w = rect().width();
+    qreal h = rect().height();
 
-    // Input pins on the left edge
+    // Determine how many selector pins go on top (for mux/demux)
+    int numSelectors = 0;
+    auto *muxComp = dynamic_cast<Mux*>(m_component);
+    auto *demuxComp = dynamic_cast<Demux*>(m_component);
+    if (muxComp) {
+        numSelectors = static_cast<int>(std::log2(muxComp->numDataInputs()));
+    } else if (demuxComp) {
+        numSelectors = static_cast<int>(std::log2(demuxComp->numDataOutputs()));
+    }
+
+    int dataInputs = inputs.size() - numSelectors;
+
+    // Input pins
     for (int i = 0; i < inputs.size(); ++i) {
         auto *pinItem = new PinGraphicsItem(inputs[i], this);
-        qreal y = (h / (inputs.size() + 1)) * (i + 1);
-        pinItem->setPos(0, y);
+        if (i >= dataInputs && numSelectors > 0) {
+            // Selector pin — place on top edge of trapezoid, centered horizontally
+            int selIdx = i - dataInputs;
+            qreal x = (w / (numSelectors + 1)) * (selIdx + 1);
+            // Follow the slant of the trapezoid top edge
+            qreal y;
+            if (muxComp) {
+                // Mux top edge: (0,0) to (w, h*0.2)
+                y = h * 0.2 * x / w;
+            } else {
+                // Demux top edge: (0, h*0.2) to (w, 0)
+                y = h * 0.2 * (1.0 - x / w);
+            }
+            pinItem->setPos(x, y);
+        } else {
+            // Data pin — place on left edge
+            int count = dataInputs > 0 ? dataInputs : inputs.size();
+            qreal y = (h / (count + 1)) * (i + 1);
+            pinItem->setPos(0, y);
+        }
         m_inputPinItems.append(pinItem);
     }
 
@@ -74,7 +106,7 @@ void ComponentGraphicsItem::createPinItems()
     for (int i = 0; i < outputs.size(); ++i) {
         auto *pinItem = new PinGraphicsItem(outputs[i], this);
         qreal y = (h / (outputs.size() + 1)) * (i + 1);
-        pinItem->setPos(Width, y);
+        pinItem->setPos(w, y);
         m_outputPinItems.append(pinItem);
     }
 }
@@ -98,7 +130,18 @@ void ComponentGraphicsItem::rebuildPins()
 
 qreal ComponentGraphicsItem::computeHeight() const
 {
-    int maxPins = qMax(m_component->inputPins().size(), m_component->outputPins().size());
+    int inputCount = m_component->inputPins().size();
+    int outputCount = m_component->outputPins().size();
+
+    // For mux/demux, selector pins are on top, not left side
+    auto *muxComp = dynamic_cast<Mux*>(m_component);
+    auto *demuxComp = dynamic_cast<Demux*>(m_component);
+    if (muxComp)
+        inputCount = muxComp->numDataInputs();
+    else if (demuxComp)
+        inputCount = 1; // just the D input on the left
+
+    int maxPins = qMax(inputCount, outputCount);
     return qMax(Height, (maxPins + 1) * PinSpacing);
 }
 
@@ -131,9 +174,32 @@ void ComponentGraphicsItem::repositionPins()
     const auto &inputs = m_component->inputPins();
     const auto &outputs = m_component->outputPins();
 
+    int numSelectors = 0;
+    auto *muxComp = dynamic_cast<Mux*>(m_component);
+    auto *demuxComp = dynamic_cast<Demux*>(m_component);
+    if (muxComp)
+        numSelectors = static_cast<int>(std::log2(muxComp->numDataInputs()));
+    else if (demuxComp)
+        numSelectors = static_cast<int>(std::log2(demuxComp->numDataOutputs()));
+
+    int dataInputs = inputs.size() - numSelectors;
+
     for (int i = 0; i < m_inputPinItems.size(); ++i) {
-        qreal y = (r.height() / (inputs.size() + 1)) * (i + 1);
-        m_inputPinItems[i]->setPos(0, y);
+        if (i >= dataInputs && numSelectors > 0) {
+            int selIdx = i - dataInputs;
+            qreal x = (r.width() / (numSelectors + 1)) * (selIdx + 1);
+            qreal y;
+            if (muxComp) {
+                y = r.height() * 0.2 * x / r.width();
+            } else {
+                y = r.height() * 0.2 * (1.0 - x / r.width());
+            }
+            m_inputPinItems[i]->setPos(x, y);
+        } else {
+            int count = dataInputs > 0 ? dataInputs : inputs.size();
+            qreal y = (r.height() / (count + 1)) * (i + 1);
+            m_inputPinItems[i]->setPos(0, y);
+        }
     }
     for (int i = 0; i < m_outputPinItems.size(); ++i) {
         qreal y = (r.height() / (outputs.size() + 1)) * (i + 1);
@@ -887,11 +953,37 @@ void ComponentGraphicsItem::paintPinLabels(QPainter *painter)
     const auto &inputs = m_component->inputPins();
     const auto &outputs = m_component->outputPins();
 
-    // Input pin labels (left side, offset 8px from left edge)
+    // Determine selector count for mux/demux
+    int numSelectors = 0;
+    auto *muxComp = dynamic_cast<Mux*>(m_component);
+    auto *demuxComp = dynamic_cast<Demux*>(m_component);
+    if (muxComp)
+        numSelectors = static_cast<int>(std::log2(muxComp->numDataInputs()));
+    else if (demuxComp)
+        numSelectors = static_cast<int>(std::log2(demuxComp->numDataOutputs()));
+
+    int dataInputs = inputs.size() - numSelectors;
+
+    // Input pin labels
     for (int i = 0; i < inputs.size(); ++i) {
-        qreal y = (r.height() / (inputs.size() + 1)) * (i + 1);
-        QRectF textRect(r.x() + 8, r.y() + y - 7, r.width() / 2.0 - 10, 14);
-        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, inputs[i]->name());
+        if (i >= dataInputs && numSelectors > 0) {
+            // Selector pin label — draw below the pin on the trapezoid edge
+            int selIdx = i - dataInputs;
+            qreal x = (r.width() / (numSelectors + 1)) * (selIdx + 1);
+            qreal y;
+            if (muxComp)
+                y = r.height() * 0.2 * x / r.width();
+            else
+                y = r.height() * 0.2 * (1.0 - x / r.width());
+            QRectF textRect(r.x() + x - 15, r.y() + y + 4, 30, 14);
+            painter->drawText(textRect, Qt::AlignCenter, inputs[i]->name());
+        } else {
+            // Data pin label — left side
+            int count = dataInputs > 0 ? dataInputs : inputs.size();
+            qreal y = (r.height() / (count + 1)) * (i + 1);
+            QRectF textRect(r.x() + 8, r.y() + y - 7, r.width() / 2.0 - 10, 14);
+            painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, inputs[i]->name());
+        }
     }
 
     // Output pin labels (right side, offset 8px from right edge)
