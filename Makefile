@@ -74,6 +74,7 @@ SOURCES       = src/main.cpp \
 		src/components/bussplitter.cpp \
 		src/components/busjoiner.cpp \
 		src/components/customcomponent.cpp \
+		src/components/tristatebuffer.cpp \
 		src/dialogs/createcustomdialog.cpp \
 		src/graphics/componentgraphicsitem.cpp \
 		src/graphics/pingraphicsitem.cpp \
@@ -108,6 +109,7 @@ OBJECTS       = main.o \
 		bussplitter.o \
 		busjoiner.o \
 		customcomponent.o \
+		tristatebuffer.o \
 		createcustomdialog.o \
 		componentgraphicsitem.o \
 		pingraphicsitem.o \
@@ -353,6 +355,7 @@ DIST          = ../../anaconda3/mkspecs/features/spec_pre.prf \
 		src/components/bussplitter.h \
 		src/components/busjoiner.h \
 		src/components/customcomponent.h \
+		src/components/tristatebuffer.h \
 		src/dialogs/createcustomdialog.h \
 		src/graphics/componentgraphicsitem.h \
 		src/graphics/pingraphicsitem.h \
@@ -380,6 +383,7 @@ DIST          = ../../anaconda3/mkspecs/features/spec_pre.prf \
 		src/components/bussplitter.cpp \
 		src/components/busjoiner.cpp \
 		src/components/customcomponent.cpp \
+		src/components/tristatebuffer.cpp \
 		src/dialogs/createcustomdialog.cpp \
 		src/graphics/componentgraphicsitem.cpp \
 		src/graphics/pingraphicsitem.cpp \
@@ -863,8 +867,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../anaconda3/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/mainwindow.h src/canvas/circuitscene.h src/canvas/circuitview.h src/model/pin.h src/model/component.h src/model/wire.h src/model/circuit.h src/model/simulationengine.h src/components/gatecomponent.h src/components/inputswitch.h src/components/outputprobe.h src/components/clocksource.h src/components/flipflop.h src/components/latch.h src/components/mux.h src/components/demux.h src/components/registercomponent.h src/components/counter.h src/components/bussplitter.h src/components/busjoiner.h src/components/customcomponent.h src/dialogs/createcustomdialog.h src/graphics/componentgraphicsitem.h src/graphics/pingraphicsitem.h src/graphics/wiregraphicsitem.h src/widgets/truthtabledialog.h src/widgets/timingdiagramwidget.h $(DISTDIR)/
-	$(COPY_FILE) --parents src/main.cpp src/mainwindow.cpp src/canvas/circuitscene.cpp src/canvas/circuitview.cpp src/model/pin.cpp src/model/component.cpp src/model/wire.cpp src/model/circuit.cpp src/model/simulationengine.cpp src/components/gatecomponent.cpp src/components/inputswitch.cpp src/components/outputprobe.cpp src/components/clocksource.cpp src/components/flipflop.cpp src/components/latch.cpp src/components/mux.cpp src/components/demux.cpp src/components/registercomponent.cpp src/components/counter.cpp src/components/bussplitter.cpp src/components/busjoiner.cpp src/components/customcomponent.cpp src/dialogs/createcustomdialog.cpp src/graphics/componentgraphicsitem.cpp src/graphics/pingraphicsitem.cpp src/graphics/wiregraphicsitem.cpp src/widgets/truthtabledialog.cpp src/widgets/timingdiagramwidget.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/mainwindow.h src/canvas/circuitscene.h src/canvas/circuitview.h src/model/pin.h src/model/component.h src/model/wire.h src/model/circuit.h src/model/simulationengine.h src/components/gatecomponent.h src/components/inputswitch.h src/components/outputprobe.h src/components/clocksource.h src/components/flipflop.h src/components/latch.h src/components/mux.h src/components/demux.h src/components/registercomponent.h src/components/counter.h src/components/bussplitter.h src/components/busjoiner.h src/components/customcomponent.h src/components/tristatebuffer.h src/dialogs/createcustomdialog.h src/graphics/componentgraphicsitem.h src/graphics/pingraphicsitem.h src/graphics/wiregraphicsitem.h src/widgets/truthtabledialog.h src/widgets/timingdiagramwidget.h $(DISTDIR)/
+	$(COPY_FILE) --parents src/main.cpp src/mainwindow.cpp src/canvas/circuitscene.cpp src/canvas/circuitview.cpp src/model/pin.cpp src/model/component.cpp src/model/wire.cpp src/model/circuit.cpp src/model/simulationengine.cpp src/components/gatecomponent.cpp src/components/inputswitch.cpp src/components/outputprobe.cpp src/components/clocksource.cpp src/components/flipflop.cpp src/components/latch.cpp src/components/mux.cpp src/components/demux.cpp src/components/registercomponent.cpp src/components/counter.cpp src/components/bussplitter.cpp src/components/busjoiner.cpp src/components/customcomponent.cpp src/components/tristatebuffer.cpp src/dialogs/createcustomdialog.cpp src/graphics/componentgraphicsitem.cpp src/graphics/pingraphicsitem.cpp src/graphics/wiregraphicsitem.cpp src/widgets/truthtabledialog.cpp src/widgets/timingdiagramwidget.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -1302,6 +1306,9 @@ moc_simulationengine.cpp: src/model/simulationengine.h \
 		../../anaconda3/include/qt/QtCore/qvarlengtharray.h \
 		../../anaconda3/include/qt/QtCore/qcontainerfwd.h \
 		../../anaconda3/include/qt/QtCore/qobject_impl.h \
+		../../anaconda3/include/qt/QtCore/QVector \
+		src/model/pin.h \
+		../../anaconda3/include/qt/QtCore/QString \
 		moc_predefs.h \
 		../../anaconda3/bin/moc
 	/Users/Dylan/anaconda3/bin/moc $(DEFINES) --include /Users/Dylan/Documents/digital_design_app/moc_predefs.h -I/Users/Dylan/anaconda3/mkspecs/macx-clang -I/Users/Dylan/Documents/digital_design_app -I/Users/Dylan/Documents/digital_design_app/src -I/Users/Dylan/anaconda3/include/qt -I/Users/Dylan/anaconda3/include/qt/QtSvg -I/Users/Dylan/anaconda3/include/qt/QtWidgets -I/Users/Dylan/anaconda3/include/qt/QtGui -I/Users/Dylan/anaconda3/include/qt/QtCore -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/17/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include src/model/simulationengine.h -o moc_simulationengine.cpp
@@ -1938,6 +1945,7 @@ mainwindow.o: src/mainwindow.cpp src/mainwindow.h \
 		../../anaconda3/include/qt/QtWidgets/qstyle.h \
 		../../anaconda3/include/qt/QtWidgets/qtabbar.h \
 		../../anaconda3/include/qt/QtWidgets/qrubberband.h \
+		../../anaconda3/include/qt/QtWidgets/QListWidgetItem \
 		../../anaconda3/include/qt/QtWidgets/QMenuBar \
 		../../anaconda3/include/qt/QtWidgets/qmenubar.h \
 		../../anaconda3/include/qt/QtWidgets/qmenu.h \
@@ -1972,6 +1980,13 @@ mainwindow.o: src/mainwindow.cpp src/mainwindow.h \
 		../../anaconda3/include/qt/QtWidgets/qmessagebox.h \
 		../../anaconda3/include/qt/QtWidgets/QDockWidget \
 		../../anaconda3/include/qt/QtWidgets/qdockwidget.h \
+		../../anaconda3/include/qt/QtWidgets/QToolButton \
+		../../anaconda3/include/qt/QtWidgets/qtoolbutton.h \
+		../../anaconda3/include/qt/QtWidgets/qabstractbutton.h \
+		../../anaconda3/include/qt/QtWidgets/QToolBar \
+		../../anaconda3/include/qt/QtWidgets/qtoolbar.h \
+		../../anaconda3/include/qt/QtGui/QPixmap \
+		../../anaconda3/include/qt/QtGui/QPolygonF \
 		../../anaconda3/include/qt/QtCore/QDir \
 		../../anaconda3/include/qt/QtCore/QStandardPaths \
 		../../anaconda3/include/qt/QtCore/qstandardpaths.h
@@ -2136,6 +2151,7 @@ circuitscene.o: src/canvas/circuitscene.cpp src/canvas/circuitscene.h \
 		src/components/bussplitter.h \
 		src/components/busjoiner.h \
 		src/components/customcomponent.h \
+		src/components/tristatebuffer.h \
 		src/dialogs/createcustomdialog.h \
 		../../anaconda3/include/qt/QtWidgets/QDialog \
 		../../anaconda3/include/qt/QtWidgets/qdialog.h \
@@ -2292,6 +2308,7 @@ circuitview.o: src/canvas/circuitview.cpp src/canvas/circuitview.h \
 		../../anaconda3/include/qt/QtCore/QObject \
 		src/model/wire.h \
 		../../anaconda3/include/qt/QtGui/QWheelEvent \
+		../../anaconda3/include/qt/QtGui/QKeyEvent \
 		../../anaconda3/include/qt/QtWidgets/QScrollBar \
 		../../anaconda3/include/qt/QtWidgets/qscrollbar.h \
 		../../anaconda3/include/qt/QtWidgets/qabstractslider.h
@@ -2452,6 +2469,7 @@ component.o: src/model/component.cpp src/model/component.h \
 		src/components/counter.h \
 		src/components/bussplitter.h \
 		src/components/busjoiner.h \
+		src/components/tristatebuffer.h \
 		../../anaconda3/include/qt/QtCore/QJsonArray \
 		../../anaconda3/include/qt/QtCore/qjsonarray.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o component.o src/model/component.cpp
@@ -2656,6 +2674,9 @@ simulationengine.o: src/model/simulationengine.cpp src/model/simulationengine.h 
 		../../anaconda3/include/qt/QtCore/qvarlengtharray.h \
 		../../anaconda3/include/qt/QtCore/qcontainerfwd.h \
 		../../anaconda3/include/qt/QtCore/qobject_impl.h \
+		../../anaconda3/include/qt/QtCore/QVector \
+		src/model/pin.h \
+		../../anaconda3/include/qt/QtCore/QString \
 		src/model/circuit.h \
 		../../anaconda3/include/qt/QtCore/QList \
 		../../anaconda3/include/qt/QtCore/QJsonObject \
@@ -2683,11 +2704,8 @@ simulationengine.o: src/model/simulationengine.cpp src/model/simulationengine.h 
 		../../anaconda3/include/qt/QtCore/QJsonArray \
 		../../anaconda3/include/qt/QtCore/qjsonarray.h \
 		src/model/component.h \
-		../../anaconda3/include/qt/QtCore/QString \
 		../../anaconda3/include/qt/QtCore/QUuid \
 		../../anaconda3/include/qt/QtCore/QPointF \
-		../../anaconda3/include/qt/QtCore/QVector \
-		src/model/pin.h \
 		src/model/wire.h \
 		../../anaconda3/include/qt/QtCore/QHash
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o simulationengine.o src/model/simulationengine.cpp
@@ -3835,6 +3853,90 @@ customcomponent.o: src/components/customcomponent.cpp src/components/customcompo
 		../../anaconda3/include/qt/QtCore/qjsondocument.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o customcomponent.o src/components/customcomponent.cpp
 
+tristatebuffer.o: src/components/tristatebuffer.cpp src/components/tristatebuffer.h \
+		src/model/component.h \
+		../../anaconda3/include/qt/QtCore/QString \
+		../../anaconda3/include/qt/QtCore/qstring.h \
+		../../anaconda3/include/qt/QtCore/qchar.h \
+		../../anaconda3/include/qt/QtCore/qglobal.h \
+		../../anaconda3/include/qt/QtCore/qconfig-bootstrapped.h \
+		../../anaconda3/include/qt/QtCore/qconfig.h \
+		../../anaconda3/include/qt/QtCore/qtcore-config.h \
+		../../anaconda3/include/qt/QtCore/qsystemdetection.h \
+		../../anaconda3/include/qt/QtCore/qprocessordetection.h \
+		../../anaconda3/include/qt/QtCore/qcompilerdetection.h \
+		../../anaconda3/include/qt/QtCore/qtypeinfo.h \
+		../../anaconda3/include/qt/QtCore/qsysinfo.h \
+		../../anaconda3/include/qt/QtCore/qlogging.h \
+		../../anaconda3/include/qt/QtCore/qflags.h \
+		../../anaconda3/include/qt/QtCore/qatomic.h \
+		../../anaconda3/include/qt/QtCore/qbasicatomic.h \
+		../../anaconda3/include/qt/QtCore/qatomic_bootstrap.h \
+		../../anaconda3/include/qt/QtCore/qgenericatomic.h \
+		../../anaconda3/include/qt/QtCore/qatomic_cxx11.h \
+		../../anaconda3/include/qt/QtCore/qatomic_msvc.h \
+		../../anaconda3/include/qt/QtCore/qglobalstatic.h \
+		../../anaconda3/include/qt/QtCore/qmutex.h \
+		../../anaconda3/include/qt/QtCore/qnumeric.h \
+		../../anaconda3/include/qt/QtCore/qversiontagging.h \
+		../../anaconda3/include/qt/QtCore/qbytearray.h \
+		../../anaconda3/include/qt/QtCore/qrefcount.h \
+		../../anaconda3/include/qt/QtCore/qnamespace.h \
+		../../anaconda3/include/qt/QtCore/qarraydata.h \
+		../../anaconda3/include/qt/QtCore/qstringliteral.h \
+		../../anaconda3/include/qt/QtCore/qstringalgorithms.h \
+		../../anaconda3/include/qt/QtCore/qstringview.h \
+		../../anaconda3/include/qt/QtCore/qstringbuilder.h \
+		../../anaconda3/include/qt/QtCore/QUuid \
+		../../anaconda3/include/qt/QtCore/quuid.h \
+		../../anaconda3/include/qt/QtCore/QPointF \
+		../../anaconda3/include/qt/QtCore/qpoint.h \
+		../../anaconda3/include/qt/QtCore/QVector \
+		../../anaconda3/include/qt/QtCore/qvector.h \
+		../../anaconda3/include/qt/QtCore/qalgorithms.h \
+		../../anaconda3/include/qt/QtCore/qiterator.h \
+		../../anaconda3/include/qt/QtCore/qhashfunctions.h \
+		../../anaconda3/include/qt/QtCore/qpair.h \
+		../../anaconda3/include/qt/QtCore/qcontainertools_impl.h \
+		../../anaconda3/include/qt/QtCore/QJsonObject \
+		../../anaconda3/include/qt/QtCore/qjsonobject.h \
+		../../anaconda3/include/qt/QtCore/qjsonvalue.h \
+		../../anaconda3/include/qt/QtCore/qshareddata.h \
+		../../anaconda3/include/qt/QtCore/qhash.h \
+		../../anaconda3/include/qt/QtCore/qlist.h \
+		../../anaconda3/include/qt/QtCore/qbytearraylist.h \
+		../../anaconda3/include/qt/QtCore/qstringlist.h \
+		../../anaconda3/include/qt/QtCore/qregexp.h \
+		../../anaconda3/include/qt/QtCore/qstringmatcher.h \
+		../../anaconda3/include/qt/QtCore/qcborvalue.h \
+		../../anaconda3/include/qt/QtCore/qdatetime.h \
+		../../anaconda3/include/qt/QtCore/qcborcommon.h \
+		../../anaconda3/include/qt/QtCore/qobjectdefs.h \
+		../../anaconda3/include/qt/QtCore/qobjectdefs_impl.h \
+		../../anaconda3/include/qt/QtCore/qmetatype.h \
+		../../anaconda3/include/qt/QtCore/qvarlengtharray.h \
+		../../anaconda3/include/qt/QtCore/qcontainerfwd.h \
+		../../anaconda3/include/qt/QtCore/qdebug.h \
+		../../anaconda3/include/qt/QtCore/qmap.h \
+		../../anaconda3/include/qt/QtCore/qtextstream.h \
+		../../anaconda3/include/qt/QtCore/qiodevice.h \
+		../../anaconda3/include/qt/QtCore/qobject.h \
+		../../anaconda3/include/qt/QtCore/qcoreevent.h \
+		../../anaconda3/include/qt/QtCore/qscopedpointer.h \
+		../../anaconda3/include/qt/QtCore/qobject_impl.h \
+		../../anaconda3/include/qt/QtCore/qlocale.h \
+		../../anaconda3/include/qt/QtCore/qvariant.h \
+		../../anaconda3/include/qt/QtCore/qset.h \
+		../../anaconda3/include/qt/QtCore/qcontiguouscache.h \
+		../../anaconda3/include/qt/QtCore/qsharedpointer.h \
+		../../anaconda3/include/qt/QtCore/qsharedpointer_impl.h \
+		../../anaconda3/include/qt/QtCore/qregularexpression.h \
+		../../anaconda3/include/qt/QtCore/qurl.h \
+		../../anaconda3/include/qt/QtCore/qurlquery.h \
+		src/model/pin.h \
+		../../anaconda3/include/qt/QtCore/QObject
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tristatebuffer.o src/components/tristatebuffer.cpp
+
 createcustomdialog.o: src/dialogs/createcustomdialog.cpp src/dialogs/createcustomdialog.h \
 		../../anaconda3/include/qt/QtWidgets/QDialog \
 		../../anaconda3/include/qt/QtWidgets/qdialog.h \
@@ -4080,6 +4182,7 @@ componentgraphicsitem.o: src/graphics/componentgraphicsitem.cpp src/graphics/com
 		../../anaconda3/include/qt/QtWidgets/QGraphicsEllipseItem \
 		src/graphics/wiregraphicsitem.h \
 		../../anaconda3/include/qt/QtWidgets/QGraphicsPathItem \
+		../../anaconda3/include/qt/QtCore/QPointF \
 		src/canvas/circuitscene.h \
 		../../anaconda3/include/qt/QtWidgets/QGraphicsScene \
 		../../anaconda3/include/qt/QtWidgets/qgraphicsscene.h \
@@ -4104,7 +4207,6 @@ componentgraphicsitem.o: src/graphics/componentgraphicsitem.cpp src/graphics/com
 		src/model/component.h \
 		../../anaconda3/include/qt/QtCore/QString \
 		../../anaconda3/include/qt/QtCore/QUuid \
-		../../anaconda3/include/qt/QtCore/QPointF \
 		src/model/pin.h \
 		../../anaconda3/include/qt/QtCore/QObject \
 		src/model/wire.h \
@@ -4124,6 +4226,7 @@ componentgraphicsitem.o: src/graphics/componentgraphicsitem.cpp src/graphics/com
 		src/components/bussplitter.h \
 		src/components/busjoiner.h \
 		src/components/customcomponent.h \
+		src/components/tristatebuffer.h \
 		../../anaconda3/include/qt/QtGui/QPainter \
 		../../anaconda3/include/qt/QtGui/qpainter.h \
 		../../anaconda3/include/qt/QtGui/qtextoption.h \
@@ -4134,6 +4237,7 @@ componentgraphicsitem.o: src/graphics/componentgraphicsitem.cpp src/graphics/com
 		../../anaconda3/include/qt/QtGui/QPen \
 		../../anaconda3/include/qt/QtWidgets/QGraphicsSceneMouseEvent \
 		../../anaconda3/include/qt/QtWidgets/qgraphicssceneevent.h \
+		../../anaconda3/include/qt/QtWidgets/QGraphicsSceneHoverEvent \
 		../../anaconda3/include/qt/QtWidgets/QGraphicsSceneContextMenuEvent \
 		../../anaconda3/include/qt/QtWidgets/QGraphicsView \
 		../../anaconda3/include/qt/QtWidgets/qgraphicsview.h \
@@ -4389,19 +4493,51 @@ wiregraphicsitem.o: src/graphics/wiregraphicsitem.cpp src/graphics/wiregraphicsi
 		../../anaconda3/include/qt/QtGui/qrgba64.h \
 		../../anaconda3/include/qt/QtGui/qimage.h \
 		../../anaconda3/include/qt/QtGui/qpixelformat.h \
+		../../anaconda3/include/qt/QtCore/QVector \
+		../../anaconda3/include/qt/QtCore/QPointF \
 		src/graphics/pingraphicsitem.h \
 		../../anaconda3/include/qt/QtWidgets/QGraphicsEllipseItem \
 		src/graphics/componentgraphicsitem.h \
 		../../anaconda3/include/qt/QtWidgets/QGraphicsRectItem \
-		../../anaconda3/include/qt/QtCore/QVector \
-		src/model/wire.h \
-		src/model/pin.h \
-		../../anaconda3/include/qt/QtCore/QString \
-		../../anaconda3/include/qt/QtCore/QObject \
-		../../anaconda3/include/qt/QtGui/QPen \
-		../../anaconda3/include/qt/QtGui/qpen.h \
+		src/canvas/circuitscene.h \
+		../../anaconda3/include/qt/QtWidgets/QGraphicsScene \
+		../../anaconda3/include/qt/QtWidgets/qgraphicsscene.h \
 		../../anaconda3/include/qt/QtGui/qbrush.h \
-		../../anaconda3/include/qt/QtGui/QPainterPath
+		../../anaconda3/include/qt/QtGui/qfont.h \
+		../../anaconda3/include/qt/QtGui/qpen.h \
+		../../anaconda3/include/qt/QtCore/QJsonObject \
+		../../anaconda3/include/qt/QtCore/qjsonobject.h \
+		../../anaconda3/include/qt/QtCore/qjsonvalue.h \
+		../../anaconda3/include/qt/QtCore/qcborvalue.h \
+		../../anaconda3/include/qt/QtCore/qdatetime.h \
+		../../anaconda3/include/qt/QtCore/qcborcommon.h \
+		../../anaconda3/include/qt/QtCore/qregularexpression.h \
+		../../anaconda3/include/qt/QtCore/qurl.h \
+		../../anaconda3/include/qt/QtCore/qurlquery.h \
+		../../anaconda3/include/qt/QtCore/quuid.h \
+		../../anaconda3/include/qt/QtCore/QStringList \
+		src/model/circuit.h \
+		../../anaconda3/include/qt/QtCore/QList \
+		../../anaconda3/include/qt/QtCore/QJsonArray \
+		../../anaconda3/include/qt/QtCore/qjsonarray.h \
+		src/model/component.h \
+		../../anaconda3/include/qt/QtCore/QString \
+		../../anaconda3/include/qt/QtCore/QUuid \
+		src/model/pin.h \
+		../../anaconda3/include/qt/QtCore/QObject \
+		src/model/wire.h \
+		../../anaconda3/include/qt/QtGui/QPen \
+		../../anaconda3/include/qt/QtGui/QPainter \
+		../../anaconda3/include/qt/QtGui/qpainter.h \
+		../../anaconda3/include/qt/QtGui/qtextoption.h \
+		../../anaconda3/include/qt/QtGui/qfontinfo.h \
+		../../anaconda3/include/qt/QtGui/qfontmetrics.h \
+		../../anaconda3/include/qt/QtGui/QPainterPath \
+		../../anaconda3/include/qt/QtWidgets/QGraphicsSceneMouseEvent \
+		../../anaconda3/include/qt/QtWidgets/qgraphicssceneevent.h \
+		../../anaconda3/include/qt/QtWidgets/QGraphicsSceneHoverEvent \
+		../../anaconda3/include/qt/QtGui/QCursor \
+		../../anaconda3/include/qt/QtGui/qcursor.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o wiregraphicsitem.o src/graphics/wiregraphicsitem.cpp
 
 truthtabledialog.o: src/widgets/truthtabledialog.cpp src/widgets/truthtabledialog.h \

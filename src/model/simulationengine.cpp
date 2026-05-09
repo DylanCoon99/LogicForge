@@ -33,10 +33,8 @@ bool SimulationEngine::simulate()
                 snapshot[pin] = pin->state();
         }
 
-        // 2. Propagate all wires
-        for (auto *wire : m_circuit->wires()) {
-            wire->propagate();
-        }
+        // 2. Propagate all wires with bus resolution
+        propagateWithBusResolution();
 
         // 3. Evaluate all components
         for (auto *comp : m_circuit->components()) {
@@ -100,8 +98,7 @@ bool SimulationEngine::simulateSingleEdge()
                 snapshot[pin] = pin->state();
         }
 
-        for (auto *wire : m_circuit->wires())
-            wire->propagate();
+        propagateWithBusResolution();
         for (auto *comp : m_circuit->components())
             comp->evaluate();
 
@@ -129,8 +126,7 @@ bool SimulationEngine::simulateSingleEdge()
         for (auto *pin : comp->outputPins())
             pin->savePreviousState();
     }
-    for (auto *wire : m_circuit->wires())
-        wire->propagate();
+    propagateWithBusResolution();
     for (auto *comp : m_circuit->components())
         comp->evaluate();
 
@@ -151,8 +147,7 @@ bool SimulationEngine::simulateSingleEdge()
                 snapshot[pin] = pin->state();
         }
 
-        for (auto *wire : m_circuit->wires())
-            wire->propagate();
+        propagateWithBusResolution();
         for (auto *comp : m_circuit->components())
             comp->evaluate();
 
@@ -176,4 +171,39 @@ bool SimulationEngine::simulateSingleEdge()
     emit oscillationDetected();
     emit simulationComplete();
     return false;
+}
+
+Pin::State SimulationEngine::resolveBus(const QVector<Pin*> &sources)
+{
+    Pin::State driven = Pin::HighZ;
+    for (auto *src : sources) {
+        Pin::State s = src->state();
+        if (s == Pin::HighZ) continue;
+        if (s == Pin::Undefined) continue;
+        if (driven == Pin::HighZ) {
+            driven = s;
+        } else if (driven != s) {
+            return Pin::Undefined; // bus contention
+        }
+    }
+    if (driven == Pin::HighZ) {
+        for (auto *src : sources) {
+            if (src->state() == Pin::Undefined)
+                return Pin::Undefined;
+        }
+    }
+    return driven;
+}
+
+void SimulationEngine::propagateWithBusResolution()
+{
+    // Collect all drivers for each destination pin
+    QHash<Pin*, QVector<Pin*>> drivers;
+    for (auto *wire : m_circuit->wires()) {
+        drivers[wire->destPin()].append(wire->sourcePin());
+    }
+    // Resolve each destination pin
+    for (auto it = drivers.begin(); it != drivers.end(); ++it) {
+        it.key()->setState(resolveBus(it.value()));
+    }
 }

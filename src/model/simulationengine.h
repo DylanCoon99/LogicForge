@@ -2,6 +2,8 @@
 #define SIMULATIONENGINE_H
 
 #include <QObject>
+#include <QVector>
+#include "pin.h"
 
 class Circuit;
 
@@ -31,6 +33,9 @@ signals:
     void oscillationDetected();
 
 private:
+    void propagateWithBusResolution();
+    static Pin::State resolveBus(const QVector<Pin*> &sources);
+
     Circuit *m_circuit;
 };
 

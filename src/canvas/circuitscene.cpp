@@ -16,6 +16,7 @@
 #include "components/bussplitter.h"
 #include "components/busjoiner.h"
 #include "components/customcomponent.h"
+#include "components/tristatebuffer.h"
 #include "dialogs/createcustomdialog.h"
 #include "model/wire.h"
 #include "model/simulationengine.h"
@@ -104,10 +105,6 @@ void CircuitScene::completeWiring(PinGraphicsItem *destPin)
     if (srcPin->parentComponent() == dstPin->parentComponent())
         goto cancel;
 
-    // Check that destination pin is not already connected
-    if (!m_circuit->wiresForPin(dstPin).isEmpty())
-        goto cancel;
-
     {
         Wire *wire = new Wire(srcPin, dstPin);
         m_circuit->addWire(wire);
@@ -184,6 +181,10 @@ ComponentGraphicsItem* CircuitScene::createComponentItem(const QString &type, co
         comp = new BusSplitter(8);
     } else if (type.contains("Bus Joiner")) {
         comp = new BusJoiner(8);
+    } else if (type.contains("Tri-State Buffer")) {
+        comp = new TriStateBuffer(false);
+    } else if (type.contains("Tri-State Inverter")) {
+        comp = new TriStateBuffer(true);
     } else {
         // It's a gate
         auto gateType = GateComponent::gateTypeFromName(type);
@@ -212,18 +213,17 @@ void CircuitScene::removeComponentItem(ComponentGraphicsItem *item)
     }
     for (auto *ri : toRemove) {
         auto *wireItem = static_cast<WireGraphicsItem*>(ri);
-        // Remove wire from model (model deletes the Wire object)
         m_circuit->removeWire(wireItem->wire());
         removeItem(wireItem);
         delete wireItem;
     }
 
-    // Remove component from model (model deletes the Component object)
+    // Remove component from model without touching wires
+    // (we already removed the wires above)
     Component *comp = item->component();
     removeItem(item);
     delete item;
-    m_circuit->removeComponent(comp);
-    runSimulation();
+    m_circuit->removeComponentOnly(comp);
 }
 
 void CircuitScene::removeWireItem(WireGraphicsItem *item)
@@ -231,7 +231,6 @@ void CircuitScene::removeWireItem(WireGraphicsItem *item)
     m_circuit->removeWire(item->wire());
     removeItem(item);
     delete item;
-    runSimulation();
 }
 
 // ---- Helpers ----
@@ -509,18 +508,48 @@ void CircuitScene::keyPressEvent(QKeyEvent *event)
     }
 
     if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace) {
-        QList<QGraphicsItem*> selected = selectedItems();
-        for (auto *item : selected) {
+        // Collect components to delete
+        QSet<ComponentGraphicsItem*> compsToDelete;
+        for (auto *item : selectedItems()) {
             auto *compItem = dynamic_cast<ComponentGraphicsItem*>(item);
-            if (compItem) {
-                removeComponentItem(compItem);
-                continue;
-            }
+            if (compItem)
+                compsToDelete.insert(compItem);
+        }
+
+        // Find ALL wires that connect to any component being deleted,
+        // plus any wires that are directly selected
+        QSet<WireGraphicsItem*> wiresToDelete;
+        for (auto *item : selectedItems()) {
             auto *wireItem = dynamic_cast<WireGraphicsItem*>(item);
+            if (wireItem)
+                wiresToDelete.insert(wireItem);
+        }
+        for (auto *sceneItem : items()) {
+            auto *wireItem = dynamic_cast<WireGraphicsItem*>(sceneItem);
             if (wireItem) {
-                removeWireItem(wireItem);
+                if (compsToDelete.contains(wireItem->sourcePinItem()->componentItem()) ||
+                    compsToDelete.contains(wireItem->destPinItem()->componentItem())) {
+                    wiresToDelete.insert(wireItem);
+                }
             }
         }
+
+        // Remove all wires first (from model and scene)
+        for (auto *wireItem : wiresToDelete) {
+            m_circuit->removeWire(wireItem->wire());
+            removeItem(wireItem);
+            delete wireItem;
+        }
+
+        // Remove all components (from model and scene)
+        for (auto *compItem : compsToDelete) {
+            Component *comp = compItem->component();
+            removeItem(compItem);
+            delete compItem;
+            m_circuit->removeComponentOnly(comp);
+        }
+
+        runSimulation();
         event->accept();
         return;
     }

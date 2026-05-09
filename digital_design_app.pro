@@ -31,6 +31,7 @@ SOURCES += \
     src/components/bussplitter.cpp \
     src/components/busjoiner.cpp \
     src/components/customcomponent.cpp \
+    src/components/tristatebuffer.cpp \
     src/dialogs/createcustomdialog.cpp \
     src/graphics/componentgraphicsitem.cpp \
     src/graphics/pingraphicsitem.cpp \
@@ -60,6 +61,7 @@ HEADERS += \
     src/components/bussplitter.h \
     src/components/busjoiner.h \
     src/components/customcomponent.h \
+    src/components/tristatebuffer.h \
     src/dialogs/createcustomdialog.h \
     src/graphics/componentgraphicsitem.h \
     src/graphics/pingraphicsitem.h \

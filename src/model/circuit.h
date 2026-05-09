@@ -15,6 +15,7 @@ public:
 
     void addComponent(Component *comp);
     void removeComponent(Component *comp);
+    void removeComponentOnly(Component *comp); // remove from list + delete, without touching wires
 
     void addWire(Wire *wire);
     void removeWire(Wire *wire);

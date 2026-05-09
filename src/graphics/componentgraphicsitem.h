@@ -58,6 +58,7 @@ private:
     void paintRegister(QPainter *painter);
     void paintCounter(QPainter *painter);
     void paintBus(QPainter *painter);
+    void paintTriStateBuffer(QPainter *painter);
     void paintCustomComponent(QPainter *painter);
     void paintPinLabels(QPainter *painter);
     void paintClkTriangle(QPainter *painter, qreal x, qreal y);

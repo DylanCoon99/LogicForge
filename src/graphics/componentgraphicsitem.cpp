@@ -17,6 +17,7 @@
 #include "components/bussplitter.h"
 #include "components/busjoiner.h"
 #include "components/customcomponent.h"
+#include "components/tristatebuffer.h"
 
 #include <QPainter>
 #include <QPainterPath>
@@ -352,6 +353,8 @@ void ComponentGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsI
         paintCounter(painter);
     } else if (dynamic_cast<BusSplitter*>(m_component) || dynamic_cast<BusJoiner*>(m_component)) {
         paintBus(painter);
+    } else if (dynamic_cast<TriStateBuffer*>(m_component)) {
+        paintTriStateBuffer(painter);
     } else if (dynamic_cast<CustomComponent*>(m_component)) {
         paintCustomComponent(painter);
     } else {
@@ -914,6 +917,45 @@ void ComponentGraphicsItem::paintBus(QPainter *painter)
 // ============================================================================
 // paintPinLabels
 // ============================================================================
+
+void ComponentGraphicsItem::paintTriStateBuffer(QPainter *painter)
+{
+    auto *buf = dynamic_cast<TriStateBuffer*>(m_component);
+    if (!buf) return;
+
+    const QRectF r = rect();
+    const qreal w = r.width();
+    const qreal h = r.height();
+    const qreal x0 = r.x();
+    const qreal y0 = r.y();
+
+    painter->setPen(QPen(QColor(200, 200, 200), 2));
+    painter->setBrush(QBrush(QColor(50, 50, 60)));
+
+    qreal bodyW = buf->isInverting() ? (w - 12) : w;
+
+    // Triangle pointing right
+    QPainterPath path;
+    path.moveTo(x0, y0);
+    path.lineTo(x0 + bodyW, y0 + h / 2.0);
+    path.lineTo(x0, y0 + h);
+    path.closeSubpath();
+    painter->drawPath(path);
+
+    if (buf->isInverting()) {
+        paintBubble(painter, x0 + bodyW + 5, y0 + h / 2.0);
+    }
+
+    // EN label near the enable pin
+    painter->setPen(QColor(180, 180, 180));
+    QFont font = painter->font();
+    font.setPointSize(7);
+    painter->setFont(font);
+    // EN pin is input 1, positioned on left edge
+    qreal enY = (h / 3.0) * 2;
+    painter->drawText(QRectF(x0 + 8, y0 + enY - 7, w / 2, 14),
+                      Qt::AlignLeft | Qt::AlignVCenter, "EN");
+}
 
 void ComponentGraphicsItem::paintCustomComponent(QPainter *painter)
 {

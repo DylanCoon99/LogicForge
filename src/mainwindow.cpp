@@ -230,6 +230,10 @@ void MainWindow::populatePalette()
     m_palette->addItem("Output Probe");
     m_palette->addItem("Clock Source");
 
+    addPaletteHeader("Buffers");
+    m_palette->addItem("Tri-State Buffer");
+    m_palette->addItem("Tri-State Inverter");
+
     addPaletteHeader("Flip-Flops");
     m_palette->addItem("D Flip-Flop");
     m_palette->addItem("SR Flip-Flop");

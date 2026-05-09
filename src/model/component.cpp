@@ -12,6 +12,7 @@
 #include "components/counter.h"
 #include "components/bussplitter.h"
 #include "components/busjoiner.h"
+#include "components/tristatebuffer.h"
 
 #include <QJsonArray>
 
@@ -119,6 +120,10 @@ Component* Component::fromJson(const QJsonObject &obj)
     else if (type.contains("Bus Join")) {
         int bits = obj.contains("bitWidth") ? obj["bitWidth"].toInt() : 8;
         comp = new BusJoiner(bits);
+    }
+    else if (type == "Tri-State Buffer" || type == "Tri-State Inverter") {
+        bool inv = obj.contains("inverting") ? obj["inverting"].toBool() : type.contains("Inverter");
+        comp = new TriStateBuffer(inv);
     }
     else if (type.startsWith("Custom:")) {
         QString customName = obj["customName"].toString();

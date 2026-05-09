@@ -24,6 +24,12 @@ void Circuit::removeComponent(Component *comp)
     delete comp;
 }
 
+void Circuit::removeComponentOnly(Component *comp)
+{
+    m_components.removeOne(comp);
+    delete comp;
+}
+
 void Circuit::addWire(Wire *wire)
 {
     m_wires.append(wire);

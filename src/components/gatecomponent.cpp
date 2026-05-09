@@ -29,7 +29,7 @@ void GateComponent::evaluate()
 {
     // If any input is undefined, output is undefined
     for (auto *pin : m_inputs) {
-        if (pin->state() == Pin::Undefined) {
+        if (pin->state() == Pin::Undefined || pin->state() == Pin::HighZ) {
             m_outputs[0]->setState(Pin::Undefined);
             return;
         }
